@@ -186,38 +186,53 @@ public:
 	}
 	operator float*() { return &m[0][0]; }
 	void SetUniform(unsigned shaderProg, char * name) {
-		int loc = glGetUniformLocation(shaderProg, name);   	
+		int loc = glGetUniformLocation(shaderProg, name);
 		glUniformMatrix4fv(loc, 1, GL_TRUE, &m[0][0]);
 	}
-		
+
 };
 
 mat4 Translate(float tx, float ty, float tz) {
 	return mat4(1, 0, 0, 0,
-			0, 1, 0, 0,
-			0, 0, 1, 0,
-			tx, ty, tz, 1);
+		0, 1, 0, 0,
+		0, 0, 1, 0,
+		tx, ty, tz, 1);
 }
-		
+
+//mat4 Rotate(float angle, float wx, float wy, float wz) {
+//	vec3 w = vec3(wx, wy, wz).normalize();
+//	vec3 i(1, 0, 0);
+//	vec3 j(0, 1, 0);
+//	vec3 k(0, 0, 1);
+//	vec3 resI = i*cosf(angle) + dot(w, (i - w))*(1 - cosf(angle)) + cross(w, i)*sinf(angle);
+//	vec3 resJ = j*cosf(angle) + dot(w, (i - w))*(1 - cosf(angle)) + cross(w, j)*sinf(angle);
+//	vec3 resK = k*cosf(angle) + dot(w, (i - w))*(1 - cosf(angle)) + cross(w, k)*sinf(angle);
+//	return mat4(resI.x, resI.y, resI.z, 0,
+//		resJ.x, resJ.y, resJ.z, 0,
+//		resK.x, resK.y, resK.z, 0,
+//		0, 0, 0, 1);
+//}
 mat4 Rotate(float angle, float wx, float wy, float wz) {
-	vec3 w = vec3 (wx, wy, wz).normalize();
-	vec3 i(1, 0, 0);
-	vec3 j(0, 1, 0);
-	vec3 k(0, 0, 1);
-	vec3 resI = i*cosf(angle) + dot(w, (i - w))*(1 - cosf(angle)) + cross(w, i)*sinf(angle);
-	vec3 resJ = j*cosf(angle) + dot(w, (i - w))*(1 - cosf(angle)) + cross(w, j)*sinf(angle);
-	vec3 resK = k*cosf(angle) + dot(w, (i - w))*(1 - cosf(angle)) + cross(w, k)*sinf(angle);
-	return mat4(resI.x, resI.y, resI.z, 0,
-			resJ.x, resJ.y, resJ.z, 0,
-			resK.x, resK.y, resK.z, 0,
-			0, 0, 0, 1);
+	return mat4(cosf(angle) + (1 - cosf(angle))*wx*wx, (1 - cosf(angle))*wx*wy + sinf(angle)*wz, (1 - cosf(angle))*wx*wz - sinf(angle)*wy, 0,
+		(1 - cosf(angle))*wx*wy - sinf(angle)*wz, cosf(angle) + (1 - cosf(angle))*wy*wy, (1 - cosf(angle))*wy*wz + sinf(angle)*wx, 0,
+		(1 - cosf(angle))*wx*wz + sinf(angle)*wy, (1 - cosf(angle))*wy*wz - sinf(angle)*wx, cosf(angle) + (1 - cosf(angle))*wz*wz, 0,
+		0, 0, 0, 1);
 }
-		
+
+//mat4 Rotate(float angle, float wx, float wy, float wz) {
+//	float c = cosf(angle);
+//	float s = sinf(angle);
+//	return mat4(c*(1 - wx*wx) + wx*wx, wx*wy*(1 - c) + s*wz, wx*wz*(1 - c) - s*wy, 0,
+//		wy*wx*(1 - c) - s*wz, c*(1 - wy*wy) + wy*wy, wx*wz*(1 - c) + s*wx, 0,
+//		wz*wx*(1 - c) + s*wy, wz*wy*(1 - c) - s*wx, c*(1 - wz*wz) + wz*wz, 0,
+//		0, 0, 0, 1);
+//}
+
 mat4 Scale(float sx, float sy, float sz) {
 	return mat4(sx, 0, 0, 0,
-			0, sy, 0, 0,
-			0, 0, sz, 0,
-			0, 0, 0, 1);
+		0, sy, 0, 0,
+		0, 0, sz, 0,
+		0, 0, 0, 1);
 }
 
 // 3D point in homogeneous coordinates
@@ -250,7 +265,7 @@ struct Texture {
 		glBindTexture(GL_TEXTURE_2D, textureId);    // binding
 		int width, height;
 		//float *image = LoadImage(fname, width, height); // megírni!
-		float asdf[] = {1.0f,1.0f,1.0f};
+		float asdf[] = { 1.0f,1.0f,1.0f };
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height,
 			0, GL_RGB, GL_FLOAT, asdf); //Texture -> OpenGL
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -309,7 +324,7 @@ class ShadowShader : public Shader {
 )";
 public:
 	ShadowShader() {
-		
+
 	}
 
 	void Bind(RenderState& state) {
@@ -385,7 +400,7 @@ struct Geometry {
 	unsigned int vao, nVtx;
 
 	Geometry() {
-		
+
 	}
 	void Draw() {
 		glBindVertexArray(vao); glDrawArrays(GL_TRIANGLES, 0, nVtx);
@@ -439,7 +454,7 @@ class Sphere : public ParamSurface {
 	float radius;
 public:
 	Sphere(vec3 c, float r) : center(c), radius(r) {
-		
+
 	}
 
 	VertexData GenVertexData(float u, float v) {
@@ -453,7 +468,7 @@ public:
 	}
 
 	void SphereInit() {
-		Create(16, 8); // tessellation level
+		Create(64, 64); // tessellation level
 	}
 };
 
@@ -510,28 +525,28 @@ public:
 	void init() {
 		geometry = &sphere;
 		shader = &sshader;
-		diff.ka = vec3(0,1,0);
-		diff.ks = vec3(1,1,1);
-		diff.kd = vec3(1,0,0);
+		diff.ka = vec3(0, 1, 0);
+		diff.ks = vec3(1, 1, 1);
+		diff.kd = vec3(1, 0, 0);
 		diff.shine = 20;
 		material = &diff;
-		scale = vec3(2,2,2);
-		pos = vec3(1, 1, 1);
+		scale = vec3(1, 1, 1);
+		pos = vec3(0, 0, 0);
 		rotAxis = vec3(1, 1, 1);
-		rotAngle = M_PI / 2;
+		rotAngle = M_PI / 3;
 	}
 };
 
 Object hardCodedSphere;
 Camera initCamera() {
 	Camera camera;
-	camera.wEye = vec3(0, 0, 40);
-	camera.wLookat = vec3(0, 0, 5);
-	camera.wVup = vec3(0, 10, 5);
-	camera.fov = 3.14 / 6;
+	camera.wEye = vec3(0, 0, 60);
+	camera.wLookat = vec3(0, 0, 0);
+	camera.wVup = vec3(0, 1, 0);
+	camera.fov = 3.14 / 3;
 	camera.asp = 1.0f;
 	camera.fp = 2;
-	camera.bp = 40;
+	camera.bp = 100;
 	return camera;
 }
 
@@ -558,8 +573,8 @@ public:
 	void init() {
 		this->camera = initCamera();
 		objects.push_back(&hardCodedSphere);
-		light.La = vec3(0.1,0.1,0.1);
-		light.Le = vec3(1,1,1);
+		light.La = vec3(0.1, 0.1, 0.1);
+		light.Le = vec3(1, 1, 1);
 		light.wLightPos = vec3(2, 2, 2);
 	}
 };
@@ -662,8 +677,8 @@ void onMouseMotion(int pX, int pY) {
 void onIdle() {
 	long time = glutGet(GLUT_ELAPSED_TIME); // elapsed time since the start of the program
 	float sec = time / 1000.0f;				// convert msec to sec
-	//camera.Animate(sec);					// animate the camera
-	//triangle.Animate(sec);					// animate the triangle object
+											//camera.Animate(sec);					// animate the camera
+											//triangle.Animate(sec);					// animate the triangle object
 	glutPostRedisplay();					// redraw the scene
 }
 
